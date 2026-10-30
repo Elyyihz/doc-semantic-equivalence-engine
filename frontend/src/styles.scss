@@ -1,0 +1,30 @@
+:root {
+  --bg-primary: #0a0d14;
+  --bg-surface: #121622;
+  --bg-card: #181d2e;
+  --border-color: #232b40;
+  --text-main: #f0f4fc;
+  --text-muted: #8b9bb4;
+  --accent-cyan: #00d2ff;
+  --accent-blue: #3a7bd5;
+  --status-equivalent: #10b981;
+  --status-partial: #f59e0b;
+  --status-divergent: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+}
