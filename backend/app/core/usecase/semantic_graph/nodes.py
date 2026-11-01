@@ -1,11 +1,14 @@
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from app.core.domain.gateway.ocr_gateway import OcrGateway
 from app.core.domain.gateway.vector_store_gateway import VectorStoreGateway
 from app.core.domain.gateway.llm_gateway import LlmGateway
+from app.core.domain.gateway.sparse_search_gateway import SparseSearchGateway
+from app.core.domain.gateway.reranker_gateway import RerankerGateway
 from app.core.domain.models.document import DocumentChunk
 from app.core.domain.enum.processing_stage import ProcessingStage
 from app.core.usecase.semantic_graph.state import SemanticGraphState
+from app.core.usecase.reciprocal_rank_fusion import reciprocal_rank_fusion
 
 logger = logging.getLogger("semantic_engine.graph.nodes")
 
@@ -18,6 +21,8 @@ class SemanticGraphNodes:
         ocr_gateway: OcrGateway,
         vector_store_gateway: VectorStoreGateway,
         llm_gateway: LlmGateway,
+        sparse_gateway: Optional[SparseSearchGateway] = None,
+        reranker_gateway: Optional[RerankerGateway] = None,
     ):
         """Initializes nodes with domain gateway dependencies.
 
@@ -25,10 +30,14 @@ class SemanticGraphNodes:
             ocr_gateway: OCR engine adapter.
             vector_store_gateway: Vector database adapter.
             llm_gateway: LLM inference runtime adapter.
+            sparse_gateway: Optional BM25 lexical search adapter.
+            reranker_gateway: Optional Cross-Encoder reranker adapter.
         """
         self.ocr_gateway = ocr_gateway
         self.vector_store_gateway = vector_store_gateway
         self.llm_gateway = llm_gateway
+        self.sparse_gateway = sparse_gateway
+        self.reranker_gateway = reranker_gateway
 
     async def node_extract_ocr(self, state: SemanticGraphState) -> Dict[str, Any]:
         """Extracts text and layout tokens from document bytes using PaddleOCR.
@@ -124,6 +133,12 @@ class SemanticGraphNodes:
         ]
         await self.vector_store_gateway.upsert_chunks(doc_id, domain_chunks)
 
+        # Index in sparse BM25 engine if configured
+        if self.sparse_gateway:
+            for c in chunks:
+                self.sparse_gateway.index_document(c["chunk_id"], c["text"])
+            logger.info("Indexed %d chunks into BM25 sparse keyword index", len(chunks))
+
         logger.info("Step concluded: Text chunking and embedding successfully indexed for document_id=%s", doc_id)
         return {
             "chunks": chunks,
@@ -133,7 +148,7 @@ class SemanticGraphNodes:
         }
 
     async def node_vector_search(self, state: SemanticGraphState) -> Dict[str, Any]:
-        """Queries Qdrant vector index to identify nearest similar documents.
+        """Queries Qdrant vector index and BM25 sparse index using RRF hybrid fusion.
 
         Args:
             state: Current graph state.
@@ -142,9 +157,10 @@ class SemanticGraphNodes:
             State updated with retrieved candidate documents.
         """
         doc_id = state["document_id"]
-        logger.info("Step started: Executing vector similarity search for document_id=%s", doc_id)
+        logger.info("Step started: Executing hybrid similarity search for document_id=%s", doc_id)
 
         embeddings = state.get("embeddings", [])
+        raw_text = state.get("extracted_text", "")
         if not embeddings:
             logger.warning("Decision taken: No embeddings present; skipping nearest neighbor search")
             return {
@@ -152,31 +168,54 @@ class SemanticGraphNodes:
                 "current_stage": ProcessingStage.GRAPH_SYNTHESIS.value,
             }
 
-        # Query using the primary lead paragraph vector
+        # 1. Dense Vector Search
         lead_vector = embeddings[0]
         similarities = await self.vector_store_gateway.query_nearest_documents(
             query_embedding=lead_vector,
             top_k=5,
-            threshold=0.60
+            threshold=0.60,
         )
 
-        candidates = [
-            {
-                "target_document_id": s.target_document_id,
-                "cosine_similarity": s.cosine_similarity,
-                "semantic_confidence": s.semantic_confidence,
-            }
-            for s in similarities
-            if s.target_document_id != doc_id
+        dense_candidates = [
+            s.target_document_id for s in similarities if s.target_document_id != doc_id
         ]
 
-        logger.info("Decision taken: Retrieved %d candidate matches from vector index", len(candidates))
-        logger.info("Step concluded: Vector search completed for document_id=%s", doc_id)
+        # 2. Sparse Lexical BM25 Search & RRF Fusion
+        if self.sparse_gateway:
+            bm25_hits = self.sparse_gateway.query_bm25(raw_text, top_k=5)
+            sparse_candidates = [hit[0] for hit in bm25_hits if hit[0] != doc_id]
+            rrf_ranked = reciprocal_rank_fusion(dense_candidates, sparse_candidates, k=60)
+            candidates = [
+                {
+                    "target_document_id": doc,
+                    "cosine_similarity": next((s.cosine_similarity for s in similarities if s.target_document_id == doc), 0.75),
+                    "semantic_confidence": rrf_score,
+                }
+                for doc, rrf_score in rrf_ranked
+            ]
+        else:
+            candidates = [
+                {
+                    "target_document_id": s.target_document_id,
+                    "cosine_similarity": s.cosine_similarity,
+                    "semantic_confidence": s.semantic_confidence,
+                }
+                for s in similarities
+                if s.target_document_id != doc_id
+            ]
+
+        # 3. Local Cross-Encoder Reranker
+        if self.reranker_gateway and candidates:
+            candidates = await self.reranker_gateway.rerank(raw_text, candidates)
+            logger.info("Cross-Encoder reranking applied to %d candidates", len(candidates))
+
+        logger.info("Decision taken: Retrieved and reranked %d candidate matches", len(candidates))
+        logger.info("Step concluded: Search completed for document_id=%s", doc_id)
 
         return {
             "matched_candidates": candidates,
             "current_stage": ProcessingStage.GRAPH_SYNTHESIS.value,
-            "execution_logs": state["execution_logs"] + [f"Retrieved {len(candidates)} candidates"],
+            "execution_logs": state["execution_logs"] + [f"Retrieved {len(candidates)} candidates via hybrid search"],
         }
 
     async def node_synthesize_equivalence(self, state: SemanticGraphState) -> Dict[str, Any]:

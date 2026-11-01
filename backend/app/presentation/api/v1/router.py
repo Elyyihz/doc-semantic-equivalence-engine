@@ -4,6 +4,8 @@ from app.presentation.api.v1.controllers.equivalence_controller import Equivalen
 from app.infrastructure.gateway.paddle_ocr_impl import PaddleOcrGatewayImpl
 from app.infrastructure.gateway.qdrant_vector_store_impl import QdrantVectorStoreGatewayImpl
 from app.infrastructure.gateway.vllm_client_impl import VllmClientGatewayImpl
+from app.infrastructure.gateway.bm25_search_impl import BM25SearchGatewayImpl
+from app.infrastructure.gateway.cross_encoder_reranker_impl import LocalCrossEncoderRerankerImpl
 from app.core.usecase.semantic_graph.nodes import SemanticGraphNodes
 from app.core.usecase.semantic_graph.graph import DocumentEquivalenceGraphUseCase
 from app.core.usecase.evaluate_equivalence_usecase import EvaluateEquivalenceUseCase
@@ -17,11 +19,15 @@ def get_equivalence_controller() -> EquivalenceController:
     ocr_gw = PaddleOcrGatewayImpl()
     qdrant_gw = QdrantVectorStoreGatewayImpl()
     vllm_gw = VllmClientGatewayImpl()
+    bm25_gw = BM25SearchGatewayImpl()
+    reranker_gw = LocalCrossEncoderRerankerImpl()
 
     nodes = SemanticGraphNodes(
         ocr_gateway=ocr_gw,
         vector_store_gateway=qdrant_gw,
         llm_gateway=vllm_gw,
+        sparse_gateway=bm25_gw,
+        reranker_gateway=reranker_gw,
     )
     graph_usecase = DocumentEquivalenceGraphUseCase(nodes)
     eval_usecase = EvaluateEquivalenceUseCase(graph_usecase)

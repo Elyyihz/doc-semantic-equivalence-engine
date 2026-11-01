@@ -1,0 +1,142 @@
+[
+  {
+    "id": "clause-01",
+    "category": "confidentiality",
+    "text_a": "The receiving party agrees to protect proprietary confidential information with reasonable care for a duration of five (5) years.",
+    "text_b": "Recipient must safeguard proprietary trade secrets using at least reasonable diligence for five years from disclosure.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-02",
+    "category": "indemnity",
+    "text_a": "Vendor shall indemnify, defend, and hold harmless the Customer against any third-party claims arising from intellectual property infringement.",
+    "text_b": "Customer shall indemnify Vendor for any costs incurred from third-party IP infringement lawsuits.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-03",
+    "category": "governing_law",
+    "text_a": "This agreement is governed by the laws of the State of Delaware, without regard to conflict of law principles.",
+    "text_b": "All disputes arising hereunder shall be adjudicated in accordance with Delaware state legislation.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-04",
+    "category": "termination",
+    "text_a": "Either party may terminate this agreement with thirty (30) days written notice to the other party.",
+    "text_b": "Agreement may be cancelled by either party upon delivering 30 days prior written notification.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-05",
+    "category": "limitation_of_liability",
+    "text_a": "Under no circumstances shall either party's aggregate liability exceed the total fees paid in the preceding twelve (12) months.",
+    "text_b": "Liability shall be uncapped and unlimited for any gross negligence or willful misconduct.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-06",
+    "category": "sla_availability",
+    "text_a": "Provider guarantees monthly service availability uptime of at least 99.95%, excluding scheduled maintenance.",
+    "text_b": "The monthly cloud uptime commitment is 99.95%, not counting planned maintenance windows.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-07",
+    "category": "data_protection",
+    "text_a": "Data Processor shall process personal data solely in compliance with GDPR and customer's documented instructions.",
+    "text_b": "Vendor reserves the right to commercialize anonymized customer telemetry data without consent.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-08",
+    "category": "payment_terms",
+    "text_a": "All invoices are due and payable within thirty (30) calendar days from receipt by Customer.",
+    "text_b": "Net 30 payment schedule applies to all submitted billing statements.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-09",
+    "category": "non_solicitation",
+    "text_a": "Neither party shall solicit or hire employees of the other party during the term and for one year thereafter.",
+    "text_b": "Customer agrees not to recruit Vendor personnel during active engagement and for 12 months post-termination.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-10",
+    "category": "force_majeure",
+    "text_a": "Neither party shall be liable for delays caused by acts of God, war, pandemic, or government embargo.",
+    "text_b": "Performance failure resulting from unforeseeable natural catastrophes or armed conflict shall be excused.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-11",
+    "category": "warranty_disclaimer",
+    "text_a": "Software is provided as-is without warranties of merchantability or fitness for a particular purpose.",
+    "text_b": "Vendor guarantees that software shall operate completely error-free and bug-free at all times.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-12",
+    "category": "audit_rights",
+    "text_a": "Customer may audit Vendor's security records once per year with ten (10) business days prior written notice.",
+    "text_b": "Annual security compliance reviews are permitted upon providing 10 working days advance notice.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-13",
+    "category": "severability",
+    "text_a": "If any provision is found invalid, the remaining provisions shall remain in full force and effect.",
+    "text_b": "Should a court invalidate one clause, all other contractual stipulations continue uninterrupted.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-14",
+    "category": "subcontracting",
+    "text_a": "Vendor shall not delegate or subcontract duties without Customer's prior written authorization.",
+    "text_b": "Vendor is freely entitled to outsource execution to unvetted third parties without notice.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-15",
+    "category": "amendment",
+    "text_a": "No modification of this agreement shall be valid unless executed in writing signed by authorized representatives.",
+    "text_b": "Amendments require mutual written agreement executed by signatories of both parties.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-16",
+    "category": "insurance",
+    "text_a": "Vendor shall maintain commercial general liability insurance of not less than $2,000,000 per occurrence.",
+    "text_b": "General liability policy with coverage minimum of two million dollars must be preserved by Vendor.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-17",
+    "category": "intellectual_property",
+    "text_a": "All custom deliverables developed under this SOW shall be deemed work-for-hire and owned exclusively by Customer.",
+    "text_b": "Vendor retains all copyright and patent ownership in deliverables created for Customer.",
+    "expected_verdict": "DIVERGENT"
+  },
+  {
+    "id": "clause-18",
+    "category": "dispute_resolution",
+    "text_a": "Parties shall attempt informal mediation for thirty (30) days prior to initiating formal binding arbitration.",
+    "text_b": "A mandatory 30-day good faith mediation step must precede any submission to arbitration tribunals.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-19",
+    "category": "export_compliance",
+    "text_a": "Each party agrees to comply with all applicable United States export control and economic sanction regulations.",
+    "text_b": "Compliance with US export management guidelines and international trade sanctions is compulsory.",
+    "expected_verdict": "EQUIVALENT"
+  },
+  {
+    "id": "clause-20",
+    "category": "entire_agreement",
+    "text_a": "This document constitutes the entire understanding between the parties, superseding all prior oral or written discussions.",
+    "text_b": "This contract represents the complete mutual agreement, replacing all preceding negotiations and promises.",
+    "expected_verdict": "EQUIVALENT"
+  }
+]
